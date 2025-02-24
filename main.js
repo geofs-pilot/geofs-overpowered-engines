@@ -85,7 +85,7 @@ function toggleAircraftProperties() {
     }
 
     document.addEventListener("keydown", function (event) {
-        if (event.key === "q") {
+        if (event.key.toLowerCase() === "q") {
             toggleProperties();
         }
     });
