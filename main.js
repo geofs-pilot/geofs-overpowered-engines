@@ -77,10 +77,12 @@ function toggleAircraftProperties() {
             applyNormalProperties();
             isOverpowered = false;
             console.log("Aircraft properties reset to normal.");
+            ui.notification.show("Aircraft properties reset to normal.");
         } else {
             applyOverpoweredProperties();
             isOverpowered = true;
             console.log("Aircraft properties set to overpowered mode.");
+            ui.notification.show("Aircraft properties set to overpowered mode.");
         }
     }
 
