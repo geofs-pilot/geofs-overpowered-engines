@@ -82,10 +82,11 @@ function toggleAircraftProperties() {
     }
 
     document.addEventListener("keydown", function (event) {
-        if (event.key.toLowerCase() === "q") {
-            toggleProperties();
-        }
-    });
+    if (event.key.toLowerCase() === "q" && !event.ctrlKey && !event.metaKey) {
+        toggleProperties();
+    }
+});
+
 
     console.log("Press 'Q' to toggle aircraft properties between normal and overpowered.");
 
