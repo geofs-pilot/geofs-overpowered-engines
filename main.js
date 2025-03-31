@@ -82,7 +82,7 @@ function toggleAircraftProperties() {
     }
 
     document.addEventListener("keydown", function (event) {
-    if (event.key.toLowerCase() === "q" && !event.ctrlKey && !event.metaKey) {
+    if (event.key.toLowerCase() === "q"  && !e.ctrlKey && !e.altKey && !e.metaKey) {
         toggleProperties();
     }
 });
