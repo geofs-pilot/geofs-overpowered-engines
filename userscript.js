@@ -107,7 +107,7 @@
     setInterval(() => {
         let currentAircraftID = geofs?.aircraft?.instance?.aircraftRecord?.id || null;
         if (currentAircraftID !== lastAircraftID) {
-            console.log("Aircraft changed, resetting properties.");
+            console.log("Aircraft changed, resetting toggle.");
             originalValues = { thrust: {}, zeroThrustAltitude: null, zeroRPMAltitude: null };
             isOverpowered = false;
             lastAircraftID = currentAircraftID;
