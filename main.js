@@ -42,8 +42,8 @@ function toggleAircraftProperties() {
                         thrustValue = 500000;
                         afterburnerValue = 500000;
                     } else if (mass < 100000) {
-                        thrustValue = 600000;
-                        afterburnerValue = 600000;
+                        thrustValue = 700000;
+                        afterburnerValue = 700000;
                     } else {
                         thrustValue = 900000;
                         afterburnerValue = 900000;
