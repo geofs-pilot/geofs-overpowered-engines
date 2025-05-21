@@ -9,13 +9,12 @@
 // ==/UserScript==
 
 
-(function() {
-    'use strict';
-    function toggleAircraftProperties() {
+function toggleAircraftProperties() {
     globalThis.isOverpowered = false;
     let originalValues = { thrust: {}, zeroThrustAltitude: null, zeroRPMAltitude: null };
     let lastAircraftID = geofs?.aircraft?.instance?.aircraftRecord?.id || null;
     let mass = geofs.aircraft.instance.definition.mass;
+    let thrustBoostFactor = 5;
 
     function applyOverpoweredProperties() {
     if (geofs?.aircraft?.instance) {
@@ -47,21 +46,11 @@
                     }
 
                     let thrustValue, afterburnerValue;
-
-                    if (mass < 10000) {
-                        thrustValue = 30000;
-                        afterburnerValue = 30000;
-                    } else if (mass < 50000) {
-                        thrustValue = 500000;
-                        afterburnerValue = 500000;
-                    } else if (mass < 100000) {
-                        thrustValue = 700000;
-                        afterburnerValue = 700000;
-                    } else {
-                        thrustValue = 900000;
-                        afterburnerValue = 900000;
-                    }
-
+                    let numThrust = Number(originalValues.thrust[partName].thrust);
+                    thrustValue = numThrust * thrustBoostFactor;
+                    afterburnerValue = thrustValue;
+                    console.log(originalValues.thrust);
+                    console.log(thrustValue);
                     part.thrust = thrustValue;
                     if (part.afterBurnerThrust !== undefined) {
                         part.afterBurnerThrust = afterburnerValue;
@@ -134,6 +123,9 @@
         }
     }, 500); // Check every 500ms
 }
+
+toggleAircraftProperties();
+
 
 toggleAircraftProperties();
 })();
