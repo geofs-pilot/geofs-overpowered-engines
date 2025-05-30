@@ -37,7 +37,11 @@ function toggleAircraftProperties() {
                     let thrustValue, afterburnerValue;
                     let numThrust = Number(originalValues.thrust[partName].thrust);
                     thrustValue = numThrust * thrustBoostFactor;
-                    afterburnerValue = thrustValue;
+                    if (originalValues.thrust[partName].afterBurnerThrust !== null) {
+                        afterburnerValue = originalValues.thrust[partName].afterBurnerThrust * thrustBoostFactor;
+                    } else {
+                        afterburnerValue = thrustValue;
+                    }
                     console.log(originalValues.thrust);
                     console.log(thrustValue);
                     part.thrust = thrustValue;
