@@ -3,7 +3,7 @@ function toggleAircraftProperties() {
     let originalValues = { thrust: {}, zeroThrustAltitude: null, zeroRPMAltitude: null };
     let lastAircraftID = geofs?.aircraft?.instance?.aircraftRecord?.id || null;
     let mass = geofs.aircraft.instance.definition.mass;
-    let thrustBoostFactor = 5;
+    let thrustBoostFactor = 6;
 
     function applyOverpoweredProperties() {
     if (geofs?.aircraft?.instance) {
