@@ -41,11 +41,12 @@ function toggleAircraftProperties() {
                     if (!originalValues.thrust[partName]) {
                         originalValues.thrust[partName] = {
                             thrust: part.thrust,
-                            afterBurnerThrust: part.afterBurnerThrust || null
+                            afterBurnerThrust: part.afterBurnerThrust || null,
+                            reverseThrust: part.reverseThrust || null
                         };
                     }
 
-                    let thrustValue, afterburnerValue;
+                    let thrustValue, afterburnerValue, reverseValue;
                     let numThrust = Number(originalValues.thrust[partName].thrust);
                     thrustValue = numThrust * thrustBoostFactor;
                     if (originalValues.thrust[partName].afterBurnerThrust !== null) {
@@ -53,11 +54,16 @@ function toggleAircraftProperties() {
                     } else {
                         afterburnerValue = thrustValue;
                     }
+                    let numReverse = Number(originalValues.thrust[partName].reverseThrust);
+                    reverseValue = numReverse * thrustBoostFactor
                     console.log(originalValues.thrust);
                     console.log(thrustValue);
                     part.thrust = thrustValue;
                     if (part.afterBurnerThrust !== undefined) {
                         part.afterBurnerThrust = afterburnerValue;
+                    }
+                    if (part.reverseThrust !== undefined) {
+                        part.reverseThrust = reverseValue;
                     }
                 }
             }
@@ -86,6 +92,9 @@ function toggleAircraftProperties() {
                         part.thrust = originalValues.thrust[partName].thrust;
                         if (part.afterBurnerThrust !== undefined && originalValues.thrust[partName].afterBurnerThrust !== null) {
                             part.afterBurnerThrust = originalValues.thrust[partName].afterBurnerThrust;
+                        }
+                        if (part.reverseThrust !== undefined && originalValues.thrust[partName].reverseThrust !== null) {
+                            part.reverseThrust = originalValues.thrust[partName].reverseThrust;
                         }
                     }
                 }
@@ -129,3 +138,4 @@ function toggleAircraftProperties() {
 }
 
 toggleAircraftProperties();
+
