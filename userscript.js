@@ -108,11 +108,19 @@ function toggleAircraftProperties() {
             globalThis.isOverpowered = false;
             console.log("Aircraft properties set to normal.");
             ui.notification.show("Aircraft properties set to normal.");
+            setTimeout(() => {
+                document.querySelectorAll(".geofs-haring").forEach(el => el.remove());
+            }, 3000);
+
         } else {
             applyOverpoweredProperties();
             globalThis.isOverpowered = true;
             console.log("Aircraft properties set to overpowered mode.");
             ui.notification.show("Aircraft properties set to overpowered mode.");
+            setTimeout(() => {
+                document.querySelectorAll(".geofs-haring").forEach(el => el.remove());
+            }, 3000);
+
         }
     }
 
@@ -137,5 +145,14 @@ function toggleAircraftProperties() {
     }, 500); // Check every 500ms
 }
 
-toggleAircraftProperties();
+
+const waitForGeoFS = setInterval(() => {
+    if (typeof geofs !== "undefined" && geofs.aircraft && geofs.aircraft.instance) {
+        clearInterval(waitForGeoFS);
+        setTimeout(() => {
+            toggleAircraftProperties();
+            console.log("GeoFS loaded, running addons…");
+        }, 1000);
+    }
+}, 100);
 
