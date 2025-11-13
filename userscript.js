@@ -8,10 +8,10 @@
 // @grant        none
 // ==/UserScript==
 
+let originalValues = { thrust: {}, zeroThrustAltitude: null, zeroRPMAltitude: null };
 
 function toggleAircraftProperties() {
     globalThis.isOverpowered = false;
-    let originalValues = { thrust: {}, zeroThrustAltitude: null, zeroRPMAltitude: null };
     let lastAircraftID = geofs?.aircraft?.instance?.aircraftRecord?.id || null;
     let mass = geofs.aircraft.instance.definition.mass;
     let thrustBoostFactor = 6;
@@ -47,6 +47,7 @@ function toggleAircraftProperties() {
                     }
 
                     let thrustValue, afterburnerValue, reverseValue;
+
                     let numThrust = Number(originalValues.thrust[partName].thrust);
                     thrustValue = numThrust * thrustBoostFactor;
                     if (originalValues.thrust[partName].afterBurnerThrust !== null) {
@@ -54,6 +55,7 @@ function toggleAircraftProperties() {
                     } else {
                         afterburnerValue = thrustValue;
                     }
+
                     let numReverse = Number(originalValues.thrust[partName].reverseThrust);
                     reverseValue = numReverse * thrustBoostFactor
                     console.log(originalValues.thrust);
@@ -65,6 +67,7 @@ function toggleAircraftProperties() {
                     if (part.reverseThrust !== undefined) {
                         part.reverseThrust = reverseValue;
                     }
+
                 }
             }
         }
@@ -88,11 +91,13 @@ function toggleAircraftProperties() {
             if (aircraft.parts) {
                 for (let partName in originalValues.thrust) {
                     let part = aircraft.parts[partName];
+
                     if (part?.thrust !== undefined) {
                         part.thrust = originalValues.thrust[partName].thrust;
                         if (part.afterBurnerThrust !== undefined && originalValues.thrust[partName].afterBurnerThrust !== null) {
                             part.afterBurnerThrust = originalValues.thrust[partName].afterBurnerThrust;
                         }
+
                         if (part.reverseThrust !== undefined && originalValues.thrust[partName].reverseThrust !== null) {
                             part.reverseThrust = originalValues.thrust[partName].reverseThrust;
                         }
@@ -145,12 +150,90 @@ function toggleAircraftProperties() {
     }, 500); // Check every 500ms
 }
 
+function monitorAutopilotOscillation() {
+    let lastVS = 0;
+    let lastFlipTime = 0;
+    let flipCount = 0;
+
+    const flipThreshold = 200;   //  VS change needed for "flip"
+    const flipWindow = 1000;    // ms between flips to count as oscillation
+    const releaseMargin = 10;   // knots below critical speed to restore normal PIDs
+
+    let dampened = false;
+    let criticalSpeed = null;
+
+    setInterval(() => {
+        try {
+            const ap = geofs.autopilot;
+            const VS = geofs.animation.values.verticalSpeed || 0;
+            const speed = geofs.animation.values.kias || 0;
+            const pitchPID = ap?.PIDs?.pitchAngle;
+            if (!ap || !pitchPID) return;
+
+            const apActive = ap.on;
+
+            const vsChange = Math.abs(VS - lastVS);
+            if (vsChange > flipThreshold) {
+                const now = Date.now();
+                if (now - lastFlipTime < flipWindow) {
+                    const now = Date.now();
+                    if (now - lastFlipTime < flipWindow) {
+                        flipCount++;
+                    } else {
+                        flipCount = 1;
+                    }
+                    lastFlipTime = now;
+                }
+            }
+            // When oscillation is detected while AP is on
+            if (flipCount >= 2 && apActive && !dampened) {
+                if (!originalValues.pitchPID) {
+                    originalValues.pitchPID = {
+                        kp: pitchPID._kp,
+                        ki: pitchPID._ki,
+                        kd: pitchPID._kd
+                    };
+                }
+
+                criticalSpeed = speed;
+                dampened = true;
+
+                // Apply damping
+                pitchPID._kp = 0.001;
+                pitchPID._ki = 0.001;
+                pitchPID._kd = 0.001;
+
+                console.log(`[AP Dampener] Oscillation detected at ${speed.toFixed(0)} kts — PIDs reduced.`);
+            }
+
+            // Restore when below safe speed or AP off
+            if (dampened && (!apActive || (criticalSpeed && speed < criticalSpeed - releaseMargin))) {
+                const orig = originalValues.pitchPID;
+                if (orig) {
+                    pitchPID._kp = orig.kp;
+                    pitchPID._ki = orig.ki;
+                    pitchPID._kd = orig.kd;
+                }
+
+                dampened = false;
+                criticalSpeed = null;
+                flipCount = 0;
+                console.log("[AP Dampener] Restored normal PIDs.");
+            }
+
+            lastVS = VS;
+        } catch (e) {
+            console.warn("Autopilot oscillation monitor error:", e);
+        }
+    }, 50);
+}
 
 const waitForGeoFS = setInterval(() => {
     if (typeof geofs !== "undefined" && geofs.aircraft && geofs.aircraft.instance) {
         clearInterval(waitForGeoFS);
         setTimeout(() => {
             toggleAircraftProperties();
+            monitorAutopilotOscillation();
             console.log("GeoFS loaded, running addons…");
         }, 1000);
     }
